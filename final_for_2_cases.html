@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beam Analysis</title>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ctxShear = document.getElementById("shearChart").getContext("2d");
+            const ctxMoment = document.getElementById("momentChart").getContext("2d");
+
+            const choice = parseInt(prompt("Enter your choice-\n1. Point Load with 2 supports and length of beam\n2. Uniformly distributed load with any start and end positions and 2 supports.\n3. Linearly Varying load with any start and end positions and loads/m and 2 supports."));
+
+            let beam, c, p, s1, s2, l1, l2, po1, po2;
+
+            if (choice === 1) {
+                beam = parseFloat(prompt("Enter the length of beam: "));
+                c = parseFloat(prompt("Enter the position of load: "));
+                p = parseFloat(prompt("Enter the load in kN: "));
+                s1 = parseFloat(prompt("Enter the position of Support1: "));
+                s2 = parseFloat(prompt("Enter the position of Support2: "));
+            } else if (choice === 2) {
+                beam = parseFloat(prompt("Enter the length of beam: "));
+                l1 = parseFloat(prompt("Enter the starting position of uniformly distributed load: "));
+                l2 = parseFloat(prompt("Enter the ending position of uniformly distributed load: "));
+                p = parseFloat(prompt("Enter the load in kN/m: "));
+                s1 = parseFloat(prompt("Enter the position of Support1: "));
+                s2 = parseFloat(prompt("Enter the position of Support2: "));
+            } else if (choice === 3) {
+                beam = parseFloat(prompt("Enter the length of beam: "));
+                l1 = parseFloat(prompt("Enter the starting position of Linear distributed load: "));
+                l2 = parseFloat(prompt("Enter the ending position of Linear distributed load: "));
+                po1 = parseFloat(prompt("Enter the load at start pos. in kN/m: "));
+                po2 = parseFloat(prompt("Enter the load at end pos. in kN/m: "));
+                s1 = parseFloat(prompt("Enter the position of Support1: "));
+                s2 = parseFloat(prompt("Enter the position of Support2: "));
+            } else {
+                console.log("Wrong Input");
+                return;
+            }
+
+            function findme(x, y, pow) {
+                if (y - x > 0) {
+                    if (pow >= 1) {
+                        return Math.pow(y - x, pow) / pow;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    return 0;
+                }
+            }
+
+            function findme1(x, y, pow) {
+                if (y - x > 0) {
+                    return Math.pow(y - x, pow);
+                } else {
+                    return 0;
+                }
+            }
+
+            let values = [];
+            let shearf1 = [];
+            let momentm1 = [];
+            let r11 = 0;
+            let r21 = 0;
+
+            if (choice === 1) {
+                function pointf(x) {
+                    let a = c - s1;
+                    let b = s2 - c;
+                    let l = a + b;
+                    let r1 = p * b / l;
+                    let r2 = p - r1;
+
+                    let v, m;
+                    if (x < s1 || x > s2) {
+                        v = 0;
+                        m = 0;
+                    } else if (x === s1) {
+                        v = -r1;
+                        m = 0;
+                    } else {
+                        v = -r1 * findme(s1, x, 0) + p * findme(c, x, 0);
+                        m = r1 * findme(s1, x, 1) - p * findme(c, x, 1);
+                    }
+
+                    return { v, m, r1, r2 };
+                }
+            } else if (choice === 2) {
+                function udistf(x) {
+                    let l = s2 - s1;
+                    let lf = l2 - l1;
+                    let lfm = lf / 2;
+                    let a = l1 + lfm;
+                    let b = l - a;
+                    let c = a + s1;
+                    let p1 = p * lf;
+                    let r1 = p1 * b / l;
+                    let r2 = p1 - r1;
+
+                    let v, m;
+                    if (x < s1 || x > s2) {
+                        v = 0;
+                        m = 0;
+                    } else if (x === s1) {
+                        v = -r1;
+                        m = 0;
+                    } else {
+                        v = -r1 * findme(s1, x, 0) + p * findme(l1, x, 1) - p * findme(l2, x, 1);
+                        m = r1 * findme(s1, x, 1) - (p * findme(l1, x, 2)) + (p * findme(l2, x, 2));
+                    }
+
+                    return { v, m, r1, r2 };
+                }
+            } else if (choice === 3) {
+                function undistf(x) {
+                    let l = s2 - s1;
+                    let lf = l2 - l1;
+                    let lfm = (l1 + l2) / 2;
+                    let p1 = 0;
+                    let p2 = 0;
+                    if (po2 > po1) {
+                        let lfr = (l1 + 2 * l2) / 3;
+                        p1 = lf * po1;
+                        p2 = 0.5 * lf * (po2 - po1);
+                    } else if (po1 > po2) {
+                        let lfr = (2 * l1 + l2) / 3;
+                        p1 = lf * po2;
+                        p2 = 0.5 * lf * (po1 - po2);
+                    }
+
+                    let r2 = (p1 * lfm + p2 * lfr) / (s2 - s1);
+                    let r1 = p1 + p2 - r2;
+
+                    let v, m;
+                    if (x < s1 || x > s2) {
+                        v = 0;
+                        m = 0;
+                    } else if (x === s1) {
+                        v = -r1;
+                        m = 0;
+                    } else {
+                        v = -r1 * findme1(s1, x, 0) + po1 * findme1(l1, x, 1) + ((po2 - po1) / lf) * findme(l1, x, 2) - po2 * findme1(l2, x, 1) - ((po2 - po1) / lf) * findme(l2, x, 2);
+                        m = r1 * findme(s1, x, 1) - po1 * findme(l1, x, 2) - ((po2 - po1) / lf) * findme(l1, x, 3) / 2 + po2 * findme(l2, x, 2) + ((po2 - po1) / lf) * findme(l2, x, 3) / 2;
+                    }
+
+                    return { v, m, r1, r2 };
+                }
+            }
+
+            for (let i = 0; i <= 1000; i++) {
+                const x = (i / 1000) * beam;
+                values.push(x);
+
+                let result;
+                if (choice === 1) {
+                    result = pointf(x);
+                } else if (choice === 2) {
+                    result = udistf(x);
+                } else if (choice === 3) {
+                    result = undistf(x);
+                }
+
+                shearf1.push(result.v);
+                momentm1.push(result.m);
+                r11 = result.r1;
+                r21 = result.r2;
+            }
+
+            // Plot shear force
+            new Chart(ctxShear, {
+                type: 'line',
+                data: {
+                    labels: values,
+                    datasets: [{
+                        label: 'Shear Force',
+                        data: shearf1,
+                        borderColor: 'blue',
+                        borderWidth: 1,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Shear Force Distribution'
+                    },
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Position along Beam'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Shear Force'
+                            }
+                        }]
+                    }
+                }
+            });
+
+            // Plot bending moment
+            new Chart(ctxMoment, {
+                type: 'line',
+                data: {
+                    labels: values,
+                    datasets: [{
+                        label: 'Bending Moment',
+                        data: momentm1,
+                        borderColor: 'red',
+                        borderWidth: 1,
+                        fill: false,
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Bending Moment Distribution'
+                    },
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Position along Beam'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Bending Moment'
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- HTML elements for charts -->
+    <div style="width: 50%;">
+        <canvas id="shearChart"></canvas>
+    </div>
+    <div style="width: 50%;">
+        <canvas id="momentChart"></canvas>
+    </div>
+</body>
+</html>

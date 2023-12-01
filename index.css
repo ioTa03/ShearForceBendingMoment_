@@ -1,0 +1,112 @@
+.custom-nav-links {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.department {
+    margin-top: 2vh;
+    font-size: 40px;
+    color: goldenrod;
+    text-align: center;
+}
+
+.landing-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10vh;
+}
+
+.heading {
+    text-align: left;
+}
+
+.heading h1 {
+    margin-top: 20px;
+    font-size: 36px;
+    color: black;
+}
+
+.landing-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-description {
+    text-align: left;
+    margin-right: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.project-description h3 {
+    color: #13808f;
+}
+
+.project-description h5 {
+    margin-top: 20px;
+    color: #172d33;
+    line-height: 1.5;
+}
+
+.project-description h6,
+.project-description h7 {
+    color: #6c757d;
+}
+
+.landing-image img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 20px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    animation: fadeInDown 1s;
+}
+
+.professor-credit {
+    margin-top: 3vh;
+    display: flex;
+    align-items: center;
+}
+
+.professor-credit img {
+    height: 150px;
+    width: 150px;
+    border: 3px solid gold;
+    background-color: antiquewhite;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.professor-credit div {
+    text-align: left;
+}
+
+.professor-credit h5 {
+    color: black;
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+.professor-credit p {
+    color: gray;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Animation */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

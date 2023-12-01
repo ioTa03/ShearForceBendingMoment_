@@ -1,0 +1,12 @@
+.about{
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 50px;
+}
+.custom-nav-links{
+    display: flex;
+    justify-content: space-evenly;
+}
+.heading{
+    margin-top: 20px;
+}
